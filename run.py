@@ -41,7 +41,9 @@ def main(args):
             changed = []
 
             for url, opt in tqdm(roster.items(), desc="Checking URLs"):
-                out_dir = join(args.tmp_dir, url.replace('/', '_'))
+                out_dir = join(
+                    args.tmp_dir,
+                    url.replace('/', '_').replace('?', '_').replace('&', '_'))
 
                 # Take screenshots
                 screenshot(url, out_dir, opt)
@@ -64,7 +66,7 @@ def main(args):
             if changed:
                 msg = '\n'.join(changed)
                 util.email_myself(msg, subject="Webpage Monitor")
-                util.format_print("Change detected; email sent", 'okgreen')
+                util.format_print("Change detected; email sent", 'warn')
                 # from IPython import embed; embed()
 
         if time() - start_t > exit_after:

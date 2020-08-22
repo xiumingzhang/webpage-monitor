@@ -51,8 +51,6 @@ def format_print(msg, fmt):
     """
     fmt_strs = {
         'header': '\033[95m',
-        'okblue': '\033[94m',
-        'okgreen': '\033[92m',
         'warn': '\033[93m',
         'fail': '\033[91m',
         'bold': '\033[1m',
