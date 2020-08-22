@@ -14,7 +14,7 @@ def call(cmd, cwd=None, silence_stdout=False):
             format_print(stdout, 'okblue')
 
     if stderr != '':
-        format_print(cmd, 'header')
+        format_print(cmd, 'warn')
         format_print(stderr, 'fail')
 
 

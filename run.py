@@ -66,7 +66,7 @@ def main(args):
             if changed:
                 msg = '\n'.join(changed)
                 util.email_myself(msg, subject="Webpage Monitor")
-                util.format_print("Change detected; email sent", 'warn')
+                util.format_print("Change detected; email sent", 'header')
                 # from IPython import embed; embed()
 
         if time() - start_t > exit_after:
