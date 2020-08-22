@@ -21,7 +21,7 @@ parser.add_argument(
 parser.add_argument(
     '--exit_after', type=int, default=None, help="quit after N seconds")
 parser.add_argument(
-    '--tmp_dir', type=str, default='/tmp/webpage-monitor',
+    '--tmp_dir', type=str, default='/Users/xiuming/Desktop/webpage-monitor',
     help="directory to dump screenshots for comparison")
 
 
