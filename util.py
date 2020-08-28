@@ -1,6 +1,21 @@
 from subprocess import Popen, PIPE
 from email.mime.text import MIMEText
 import smtplib
+import numpy as np
+from PIL import Image
+
+
+def imread_arr(path):
+    im = Image.open(path)
+    arr = np.array(im)[:, :, :3]
+    arr = arr.astype(float) / np.iinfo(arr.dtype).max
+    return arr
+
+
+def imwrite_arr(arr, path, dtype='uint8'):
+    arr = (arr * np.iinfo(dtype).max).astype(dtype)
+    im = Image.fromarray(arr)
+    im.save(path)
 
 
 def call(cmd, cwd=None, silence_stdout=False):
@@ -28,7 +43,18 @@ def email_myself(
     to_emails = [email]
     from_email = email
 
-    msg = MIMEText(msg)
+    msg="""\
+<html>
+  <head></head>
+  <body>
+    <p>Hi!<br>
+       How are you?<br>
+       Here is the <a href="https://www.python.org">link</a> you wanted.
+    </p>
+  </body>
+</html>
+"""
+    msg = MIMEText(msg,'html')
     msg['Subject'] = subject
     msg['To'] = ', '.join(to_emails)
     msg['From'] = from_email
@@ -55,15 +81,19 @@ def format_print(msg, fmt):
         'fail': '\033[91m',
         'bold': '\033[1m',
         'underline': '\033[4m'}
+
     if fmt in fmt_strs.keys():
         start_str = fmt_strs[fmt]
         end_str = '\033[0m'
+
     elif len(fmt) == 1:
         start_str = "\n<" + "".join([fmt] * 78) + '\n\n' # as per PEP8
         end_str = '\n' + start_str[2:-2] + ">\n"
+
     else:
-        raise ValueError(
-            ("Legal values for fmt: %s, plus any single character "
-             "(which will be repeated into the line separator), "
-             "but input is '%s'") % (list(fmt_strs.keys()), fmt))
+        raise ValueError((
+            "Legal values for fmt: %s, plus any single character "
+            "(which will be repeated into the line separator), "
+            "but input is '%s'") % (list(fmt_strs.keys()), fmt))
+
     print(start_str + msg + end_str)

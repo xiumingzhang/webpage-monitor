@@ -10,3 +10,5 @@ and after when changes are detected.
    ```
    brew install webkit2png
    ```
+
+scipy
