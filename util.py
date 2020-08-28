@@ -43,18 +43,7 @@ def email_myself(
     to_emails = [email]
     from_email = email
 
-    msg="""\
-<html>
-  <head></head>
-  <body>
-    <p>Hi!<br>
-       How are you?<br>
-       Here is the <a href="https://www.python.org">link</a> you wanted.
-    </p>
-  </body>
-</html>
-"""
-    msg = MIMEText(msg,'html')
+    msg = MIMEText(msg)
     msg['Subject'] = subject
     msg['To'] = ', '.join(to_emails)
     msg['From'] = from_email

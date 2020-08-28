@@ -49,9 +49,7 @@ def main(args):
 
             for url, opt in tqdm(roster.items(), desc="Checking URLs"):
                 out_dir = join(
-                    args.tmp_dir,
-                    url.replace('/', '_').replace('?', '_').replace('&', '_'),
-                ).rstrip('/')
+                    args.tmp_dir, replace_special_char(url)).rstrip('/')
 
                 # Take screenshots
                 screenshot(url, out_dir, opt)
@@ -130,6 +128,11 @@ def load_roster(roster_json):
     with open(roster_json, 'r') as h:
         roster = json.load(h)
     return roster
+
+
+def replace_special_char(url):
+    return url.replace(
+        '/', '_').replace('?', '_').replace('&', '_').replace(':', '_')
 
 
 if __name__ == '__main__':
