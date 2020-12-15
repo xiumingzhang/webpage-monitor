@@ -19,9 +19,9 @@ and after when changes are detected.
 
 ## Running
 
-1. Specify URLs that you'd like to track by editing `roster.json`.
+1. Specify the URLs that you'd like to track by editing `roster.json`.
 
-1. Create a file `gmail_app_pswd` with its content being your Gmail
+1. Create a file, named `gmail_app_pswd`, with its content being your Gmail
    app-specific password (a Gmail-only password; see how to set one
    up [here](https://support.google.com/accounts/answer/185833?hl=en)).
 
@@ -29,5 +29,6 @@ and after when changes are detected.
    ```
    conda activate webpage-monitor
 
+   # This conda environment's Python binary will be used
    ./run.py
    ```
