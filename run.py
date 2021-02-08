@@ -18,11 +18,11 @@ parser = argparse.ArgumentParser(description="Webpage monitor.")
 parser.add_argument(
     '--roster_json', type=str, default='./roster.json', help="path to the roster")
 parser.add_argument(
-    '--check_every', type=int, default=600, help="check every N seconds")
+    '--check_every', type=int, default=43200, help="check every N seconds")
 parser.add_argument(
     '--exit_after', type=int, default=None, help="quit after N seconds")
 parser.add_argument(
-    '--tmp_dir', type=str, default='/Users/xiuming/Desktop/webpage-monitor',
+    '--tmp_dir', type=str, default='/tmp/webpage-monitor',
     help="directory to dump screenshots for comparison")
 parser.add_argument(
     '--clear_cached', action='store_true',
