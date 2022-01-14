@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import argparse
 from os.path import join, exists
 from os import makedirs, remove
@@ -79,7 +77,6 @@ def main(args):
                         delta=delta, url=url)
                 util.email_myself(msg, subject="Webpage Monitor")
                 util.format_print("Change detected; email sent", 'header')
-                # from IPython import embed; embed()
 
         if time() - start_t > exit_after:
             break
@@ -121,7 +118,8 @@ def screenshot(url, out_dir, opt, width=512, delay=3):
         'webkit2png --fullsize --no-images --ignore-ssl-check --width={w} '
         '--delay={delay} --dir={dir_} --filename={t} {url}').format(
             w=width, delay=delay, dir_=out_dir, t=time(), url=url)
-    util.call(cmd, silence_stdout=True)
+    #util.call(cmd, silence_stdout=True)
+    print(cmd)
 
 
 def load_roster(roster_json):
