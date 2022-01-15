@@ -118,8 +118,7 @@ def screenshot(url, out_dir, opt, width=512, delay=3):
         'webkit2png --fullsize --no-images --ignore-ssl-check --width={w} '
         '--delay={delay} --dir={dir_} --filename={t} {url}').format(
             w=width, delay=delay, dir_=out_dir, t=time(), url=url)
-    #util.call(cmd, silence_stdout=True)
-    print(cmd)
+    util.call(cmd, silence_stdout=True)
 
 
 def load_roster(roster_json):
