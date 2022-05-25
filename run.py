@@ -11,20 +11,26 @@ from tqdm import tqdm
 
 import util
 
-
 parser = argparse.ArgumentParser(description="Webpage monitor.")
-parser.add_argument(
-    '--roster_json', type=str, default='./roster.json', help="path to the roster")
-parser.add_argument(
-    '--check_every', type=int, default=43200, help="check every N seconds")
-parser.add_argument(
-    '--exit_after', type=int, default=None, help="quit after N seconds")
-parser.add_argument(
-    '--tmp_dir', type=str, default='/tmp/webpage-monitor',
-    help="directory to dump screenshots for comparison")
-parser.add_argument(
-    '--clear_cached', action='store_true',
-    help="whether to clear the screenshots on disk")
+parser.add_argument('--roster_json',
+                    type=str,
+                    default='./roster.json',
+                    help="path to the roster")
+parser.add_argument('--check_every',
+                    type=int,
+                    default=43200,
+                    help="check every N seconds")
+parser.add_argument('--exit_after',
+                    type=int,
+                    default=None,
+                    help="quit after N seconds")
+parser.add_argument('--tmp_dir',
+                    type=str,
+                    default='/tmp/webpage-monitor',
+                    help="directory to dump screenshots for comparison")
+parser.add_argument('--clear_cached',
+                    action='store_true',
+                    help="whether to clear the screenshots on disk")
 
 
 def main(args):
@@ -46,8 +52,8 @@ def main(args):
             changed, deltas = [], []
 
             for url, opt in tqdm(roster.items(), desc="Checking URLs"):
-                out_dir = join(
-                    args.tmp_dir, replace_special_char(url)).rstrip('/')
+                out_dir = join(args.tmp_dir,
+                               replace_special_char(url)).rstrip('/')
 
                 # Take screenshots
                 screenshot(url, out_dir, opt)
@@ -73,8 +79,8 @@ def main(args):
             if changed:
                 msg = ''
                 for url, delta in zip(changed, deltas):
-                    msg += "file://{delta}\n{url}\n\n".format(
-                        delta=delta, url=url)
+                    msg += "file://{delta}\n{url}\n\n".format(delta=delta,
+                                                              url=url)
                 util.email_myself(msg, subject="Webpage Monitor")
                 util.format_print("Change detected; email sent", 'header')
 
@@ -82,9 +88,13 @@ def main(args):
             break
 
 
-def diff_screenshots(
-        old_png, new_png, delta_png, pix_diff_thres=0.1, n_diff_thres=16,
-        unchanged_alpha=0.2, diff_blur_sigma=4):
+def diff_screenshots(old_png,
+                     new_png,
+                     delta_png,
+                     pix_diff_thres=0.1,
+                     n_diff_thres=16,
+                     unchanged_alpha=0.2,
+                     diff_blur_sigma=4):
     old = util.imread_arr(old_png)
     new = util.imread_arr(new_png)
 
@@ -94,7 +104,7 @@ def diff_screenshots(
         return delta_png
 
     # Check content
-    pixel_is_diff = np.abs(old - new) >= pix_diff_thres # (H, W, 3)
+    pixel_is_diff = np.abs(old - new) >= pix_diff_thres  # (H, W, 3)
     pixel_is_diff = np.sum(pixel_is_diff, axis=2) > 0
 
     # Not enough different pixels for a change
@@ -114,10 +124,9 @@ def screenshot(url, out_dir, opt, width=512, delay=3):
     if not exists(out_dir):
         makedirs(out_dir)
 
-    cmd = (
-        'webkit2png --fullsize --no-images --ignore-ssl-check --width={w} '
-        '--delay={delay} --dir={dir_} --filename={t} {url}').format(
-            w=width, delay=delay, dir_=out_dir, t=time(), url=url)
+    cmd = ('webkit2png --fullsize --no-images --ignore-ssl-check --width={w} '
+           '--delay={delay} --dir={dir_} --filename={t} {url}').format(
+               w=width, delay=delay, dir_=out_dir, t=time(), url=url)
     util.call(cmd, silence_stdout=True)
 
 
@@ -128,8 +137,9 @@ def load_roster(roster_json):
 
 
 def replace_special_char(url):
-    return url.replace(
-        '/', '_').replace('?', '_').replace('&', '_').replace(':', '_')
+    return url.replace('/', '_').replace('?',
+                                         '_').replace('&',
+                                                      '_').replace(':', '_')
 
 
 if __name__ == '__main__':
