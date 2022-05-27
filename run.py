@@ -18,6 +18,10 @@ parser.add_argument('--roster_json',
                     type=str,
                     default='./roster.json',
                     help='path to the roster')
+parser.add_argument('--email_addr',
+                    type=str,
+                    default='xiuming6zhang@gmail.com',
+                    help='email address')
 parser.add_argument('--check_every',
                     type=int,
                     default=43200,
@@ -51,11 +55,14 @@ def main(args):
         if time() - last_check_t > args.check_every:
             changed, deltas = [], []
 
-            for url, opt in tqdm(roster.items(), desc='Checking URLs'):
+            pbar = tqdm(roster.items())
+            for url, opt in pbar:
+                pbar.set_description(f"Checking {url}")
+
                 # Snapshot the current webpage.
                 out_dir = join(args.snapshot_dir,
                                util.folder_name_from_url(url))
-                snapshot(url, out_dir, opt)
+                snapshot(url, out_dir)
 
                 # Compare with the previous snapshot.
                 snapshot_paths = sorted(
@@ -78,8 +85,10 @@ def main(args):
             if changed:
                 msg = ''
                 for url, delta in zip(changed, deltas):
-                    msg += f'{url}\n{delta}\n\n'
-                util.email_myself(msg, subject='Webpage Monitor')
+                    msg += f'------\n{url}\n\n{delta}\n\n\n'
+                util.email_oneself(msg,
+                                   args.email_addr,
+                                   subject='Webpage Monitor')
                 util.format_print('Change detected; email sent', 'header')
 
             if time() - start_t > exit_after:
@@ -87,22 +96,32 @@ def main(args):
 
 
 def diff_snapshots(html0_path, html1_path, out_dir, opt):
-    # TODO: Handle opt (page-specific special options)
+    # Parse URL-specific options.
+    ignore_prefices = opt.get('ignore_prefix')
+    if ignore_prefices is None:
+        ignore_prefices = []
+    if isinstance(ignore_prefices, str):
+        ignore_prefices = [ignore_prefices]
+    ignore_prefices = tuple(ignore_prefices)
+    # Diff the two HTMLs.
     html0_content = util.read_file(html0_path)
     html1_content = util.read_file(html1_path)
     delta = difflib.ndiff(html0_content.split('\n'), html1_content.split('\n'))
     # Keep differences only.
-    delta = '\n'.join(x for x in delta
-                      if x.startswith('+ ') or x.startswith('- '))
+    delta = [x for x in delta if x.startswith(('+ ', '- '))]
+    # Ignore
+    filtered_delta = [
+        x for x in delta
+        if not x.lstrip('+ ').lstrip('- ').startswith(ignore_prefices)
+    ]
+    filtered_delta = '\n'.join(filtered_delta)
     delta_path = join(out_dir, 'delta.html')
-    util.write_file(delta, delta_path)
-    return delta
+    util.write_file(filtered_delta, delta_path)
+    return filtered_delta
 
 
-def snapshot(url, out_dir, opt):
-    # TODO: Ditto
+def snapshot(url, out_dir):
     request = requests.get(url)
-    print(url)
     html_src = request.content.decode()
     if not exists(out_dir):
         makedirs(out_dir)

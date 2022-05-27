@@ -23,10 +23,10 @@ def folder_name_from_url(url):
     return folder_name
 
 
-def email_myself(msg,
-                 subject='Untitled',
-                 email='xiuming6zhang@gmail.com',
-                 pswd_path='./gmail_app_pswd'):
+def email_oneself(msg,
+                  email,
+                  subject='Untitled',
+                  pswd_path='./gmail_app_pswd'):
     pswd = read_file(pswd_path)
     pswd = pswd.strip()
 
