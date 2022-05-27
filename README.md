@@ -7,11 +7,11 @@ I'm using it to monitor website updates of the researchers I follow (e.g., new p
 
 ## Installing
 
-1. Create a conda environment with all dependencies:
+Create a conda environment with all dependencies:
 
-   ```bash
-   conda env create -f environment.yml
-   ```
+ ```bash
+ conda env create -f environment.yml
+ ```
 
 ## Running
 
