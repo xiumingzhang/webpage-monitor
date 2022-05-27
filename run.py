@@ -5,73 +5,72 @@ from shutil import rmtree
 from glob import glob
 import json
 from time import time
+import datetime
+import difflib
+import requests
 import numpy as np
-from scipy.ndimage import gaussian_filter
 from tqdm import tqdm
 
 import util
 
-parser = argparse.ArgumentParser(description="Webpage monitor.")
+parser = argparse.ArgumentParser(description='Webpage monitor.')
 parser.add_argument('--roster_json',
                     type=str,
                     default='./roster.json',
-                    help="path to the roster")
+                    help='path to the roster')
 parser.add_argument('--check_every',
                     type=int,
                     default=43200,
-                    help="check every N seconds")
+                    help='check every N seconds')
 parser.add_argument('--exit_after',
                     type=int,
                     default=None,
-                    help="quit after N seconds")
-parser.add_argument('--tmp_dir',
+                    help='quit after N seconds')
+parser.add_argument('--snapshot_dir',
                     type=str,
-                    default='/tmp/webpage-monitor',
-                    help="directory to dump screenshots for comparison")
+                    default='./snapshots',
+                    help='directory to dump screenshots for comparison')
 parser.add_argument('--clear_cached',
                     action='store_true',
-                    help="whether to clear the screenshots on disk")
+                    help='whether to clear the screenshots on disk')
 
 
 def main(args):
-    if args.exit_after is None:
-        exit_after = np.inf
-    else:
-        exit_after = args.exit_after
+    exit_after = np.inf if args.exit_after is None else args.exit_after
 
-    roster = load_roster(args.roster_json)
+    with open(args.roster_json, 'rb') as file_handle:
+        roster = json.load(file_handle)
 
     start_t = time()
     last_check_t = 0
 
-    if args.clear_cached and exists(args.tmp_dir):
-        rmtree(args.tmp_dir)
+    if args.clear_cached and exists(args.snapshot_dir):
+        rmtree(args.snapshot_dir)
 
     while True:
         if time() - last_check_t > args.check_every:
             changed, deltas = [], []
 
-            for url, opt in tqdm(roster.items(), desc="Checking URLs"):
-                out_dir = join(args.tmp_dir,
-                               replace_special_char(url)).rstrip('/')
+            for url, opt in tqdm(roster.items(), desc='Checking URLs'):
+                # Snapshot the current webpage.
+                out_dir = join(args.snapshot_dir,
+                               util.folder_name_from_url(url))
+                snapshot(url, out_dir, opt)
 
-                # Take screenshots
-                screenshot(url, out_dir, opt)
-
-                pngs = sorted(glob(join(out_dir, '*.png')))
-
-                # Compare with previous screenshots
-                if len(pngs) > 1:
-                    delta_png = out_dir + '_delta.png'
-                    delta = diff_screenshots(*pngs[-2:], delta_png)
-                    if delta is not None:
+                # Compare with the previous snapshot.
+                snapshot_paths = sorted(
+                    glob(join(out_dir, '????_??_??_??_??_??.html')))
+                if len(snapshot_paths) > 1:
+                    delta = diff_snapshots(snapshot_paths[-2],
+                                           snapshot_paths[-1], out_dir, opt)
+                    if delta != '':
                         changed.append(url)
                         deltas.append(delta)
 
                 # Remove earlier screenshots to avoid storage explosion
-                if len(pngs) > 2:
-                    for f in pngs[:-2]:
-                        remove(f)
+                if len(snapshot_paths) > 2:
+                    for x in snapshot_paths[:-2]:
+                        remove(x)
 
             last_check_t = time()
 
@@ -79,67 +78,37 @@ def main(args):
             if changed:
                 msg = ''
                 for url, delta in zip(changed, deltas):
-                    msg += "file://{delta}\n{url}\n\n".format(delta=delta,
-                                                              url=url)
-                util.email_myself(msg, subject="Webpage Monitor")
-                util.format_print("Change detected; email sent", 'header')
+                    msg += f'{url}\n{delta}\n\n'
+                util.email_myself(msg, subject='Webpage Monitor')
+                util.format_print('Change detected; email sent', 'header')
 
-        if time() - start_t > exit_after:
-            break
-
-
-def diff_screenshots(old_png,
-                     new_png,
-                     delta_png,
-                     pix_diff_thres=0.1,
-                     n_diff_thres=16,
-                     unchanged_alpha=0.2,
-                     diff_blur_sigma=4):
-    old = util.imread_arr(old_png)
-    new = util.imread_arr(new_png)
-
-    # Sizes are even different
-    if old.shape != new.shape:
-        util.imwrite_arr(new, delta_png)
-        return delta_png
-
-    # Check content
-    pixel_is_diff = np.abs(old - new) >= pix_diff_thres  # (H, W, 3)
-    pixel_is_diff = np.sum(pixel_is_diff, axis=2) > 0
-
-    # Not enough different pixels for a change
-    if np.sum(pixel_is_diff) <= n_diff_thres:
-        return None
-
-    # Highlight the changed part
-    alpha = unchanged_alpha * np.ones_like(new)
-    alpha[np.dstack([pixel_is_diff] * 3)] = 1
-    alpha = gaussian_filter(alpha, diff_blur_sigma)
-    delta = alpha * new + (1 - alpha) * np.zeros_like(new)
-    util.imwrite_arr(delta, delta_png)
-    return delta_png
+            if time() - start_t > exit_after:
+                break
 
 
-def screenshot(url, out_dir, opt, width=512, delay=3):
+def diff_snapshots(html0_path, html1_path, out_dir, opt):
+    # TODO: Handle opt (page-specific special options)
+    html0_content = util.read_file(html0_path)
+    html1_content = util.read_file(html1_path)
+    delta = difflib.ndiff(html0_content.split('\n'), html1_content.split('\n'))
+    # Keep differences only.
+    delta = '\n'.join(x for x in delta
+                      if x.startswith('+ ') or x.startswith('- '))
+    delta_path = join(out_dir, 'delta.html')
+    util.write_file(delta, delta_path)
+    return delta
+
+
+def snapshot(url, out_dir, opt):
+    # TODO: Ditto
+    request = requests.get(url)
+    print(url)
+    html_src = request.content.decode()
     if not exists(out_dir):
         makedirs(out_dir)
-
-    cmd = ('webkit2png --fullsize --no-images --ignore-ssl-check --width={w} '
-           '--delay={delay} --dir={dir_} --filename={t} {url}').format(
-               w=width, delay=delay, dir_=out_dir, t=time(), url=url)
-    util.call(cmd, silence_stdout=True)
-
-
-def load_roster(roster_json):
-    with open(roster_json, 'r') as h:
-        roster = json.load(h)
-    return roster
-
-
-def replace_special_char(url):
-    return url.replace('/', '_').replace('?',
-                                         '_').replace('&',
-                                                      '_').replace(':', '_')
+    timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    html_path = join(out_dir, timestamp + '.html')
+    util.write_file(html_src, html_path)
 
 
 if __name__ == '__main__':

@@ -1,44 +1,34 @@
-from subprocess import Popen, PIPE
 from email.mime.text import MIMEText
 import smtplib
-import numpy as np
-from PIL import Image
 
 
-def imread_arr(path):
-    im = Image.open(path)
-    arr = np.array(im)[:, :, :3]
-    arr = arr.astype(float) / np.iinfo(arr.dtype).max
-    return arr
+def read_file(path):
+    with open(path, 'rb') as file_handle:
+        content = file_handle.read()
+    return content.decode()
 
 
-def imwrite_arr(arr, path, dtype='uint8'):
-    arr = (arr * np.iinfo(dtype).max).astype(dtype)
-    im = Image.fromarray(arr)
-    im.save(path)
+def write_file(str_, path):
+    with open(path, 'wb') as file_handle:
+        file_handle.write(str_.encode())
 
 
-def call(cmd, cwd=None, silence_stdout=False):
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=cwd, shell=True)
-
-    stdout, stderr = process.communicate() # waits for completion
-    stdout, stderr = stdout.decode(), stderr.decode()
-
-    if not silence_stdout:
-        if stdout != '':
-            format_print(stdout, 'okblue')
-
-    if stderr != '':
-        format_print(cmd, 'warn')
-        format_print(stderr, 'fail')
+def folder_name_from_url(url):
+    folder_name = url.rstrip('/')
+    folder_name = folder_name.replace('http://', '').replace('https://', '')
+    folder_name = folder_name.replace('/', '_')
+    folder_name = folder_name.replace('?', '_')
+    folder_name = folder_name.replace('&', '_')
+    folder_name = folder_name.replace(':', '_')
+    return folder_name
 
 
-def email_myself(
-        msg, subject="Untitled", email='xiuming6zhang@gmail.com',
-        pswd_path='./gmail_app_pswd'):
-    with open(pswd_path, 'r') as h:
-        pswd = h.readlines()
-    pswd = pswd[0].strip()
+def email_myself(msg,
+                 subject='Untitled',
+                 email='xiuming6zhang@gmail.com',
+                 pswd_path='./gmail_app_pswd'):
+    pswd = read_file(pswd_path)
+    pswd = pswd.strip()
 
     to_emails = [email]
     from_email = email
@@ -56,33 +46,34 @@ def email_myself(
 
 
 def format_print(msg, fmt):
-    """Prints a message with format.
+    '''Prints a message with format.
     Args:
         msg (str): Message to print.
         fmt (str): Format; try your luck with any value -- don't worry; if
             it's illegal, you will be prompted with all legal values.
     Raises:
         ValueError: If the input format is illegal.
-    """
+    '''
     fmt_strs = {
         'header': '\033[95m',
         'warn': '\033[93m',
         'fail': '\033[91m',
         'bold': '\033[1m',
-        'underline': '\033[4m'}
+        'underline': '\033[4m'
+    }
 
     if fmt in fmt_strs.keys():
         start_str = fmt_strs[fmt]
         end_str = '\033[0m'
 
     elif len(fmt) == 1:
-        start_str = "\n<" + "".join([fmt] * 78) + '\n\n' # as per PEP8
-        end_str = '\n' + start_str[2:-2] + ">\n"
+        start_str = '\n<' + ''.join([fmt] * 78) + '\n\n'  # as per PEP8
+        end_str = '\n' + start_str[2:-2] + '>\n'
 
     else:
-        raise ValueError((
-            "Legal values for fmt: %s, plus any single character "
-            "(which will be repeated into the line separator), "
-            "but input is '%s'") % (list(fmt_strs.keys()), fmt))
+        raise ValueError(
+            ('Legal values for fmt: %s, plus any single character '
+             '(which will be repeated into the line separator), '
+             'but input is %s') % (list(fmt_strs.keys()), fmt))
 
     print(start_str + msg + end_str)

@@ -2,6 +2,5 @@ name: webpage-monitor
 dependencies:
     - python=3.6
     - numpy
-    - scipy
-    - pillow
     - tqdm
+    - requests
