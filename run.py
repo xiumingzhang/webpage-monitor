@@ -18,7 +18,7 @@ parser.add_argument('--roster_json',
                     type=str,
                     default='./roster.json',
                     help='path to the roster')
-parser.add_argument('--email_addr',
+parser.add_argument('--gmail',
                     type=str,
                     default='xiuming6zhang@gmail.com',
                     help='email address')
@@ -74,21 +74,19 @@ def main(args):
                         changed.append(url)
                         deltas.append(delta)
 
-                # Remove earlier screenshots to avoid storage explosion
+                # Remove earlier screenshots to avoid storage explosion.
                 if len(snapshot_paths) > 2:
                     for x in snapshot_paths[:-2]:
                         remove(x)
 
             last_check_t = time()
 
-            # Email myself the results
+            # Email myself the results.
             if changed:
                 msg = ''
                 for url, delta in zip(changed, deltas):
                     msg += f'------\n{url}\n\n{delta}\n\n\n'
-                util.email_oneself(msg,
-                                   args.email_addr,
-                                   subject='Webpage Monitor')
+                util.email_oneself(msg, args.gmail, subject='Webpage Monitor')
                 util.format_print('Change detected; email sent', 'header')
 
             if time() - start_t > exit_after:
@@ -109,7 +107,7 @@ def diff_snapshots(html0_path, html1_path, out_dir, opt):
     delta = difflib.ndiff(html0_content.split('\n'), html1_content.split('\n'))
     # Keep differences only.
     delta = [x for x in delta if x.startswith(('+ ', '- '))]
-    # Ignore
+    # Ignore specified patterns.
     filtered_delta = [
         x for x in delta
         if not x.lstrip('+ ').lstrip('- ').startswith(ignore_prefices)

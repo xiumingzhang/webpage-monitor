@@ -24,14 +24,14 @@ def folder_name_from_url(url):
 
 
 def email_oneself(msg,
-                  email,
+                  gmail,
                   subject='Untitled',
                   pswd_path='./gmail_app_pswd'):
     pswd = read_file(pswd_path)
     pswd = pswd.strip()
 
-    to_emails = [email]
-    from_email = email
+    to_emails = [gmail]
+    from_email = gmail
 
     msg = MIMEText(msg)
     msg['Subject'] = subject
@@ -40,7 +40,7 @@ def email_oneself(msg,
 
     mail = smtplib.SMTP('smtp.gmail.com', 587)
     mail.starttls()
-    mail.login(email, pswd)
+    mail.login(gmail, pswd)
     mail.sendmail(from_email, to_emails, msg.as_string())
     mail.quit()
 
