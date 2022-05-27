@@ -25,5 +25,5 @@ editing `roster.json`; see `roster.json.example`.
 
 ```bash
 conda activate webpage-monitor
-python run.py
+python main.py
 ```

@@ -1,10 +1,10 @@
 {
   "https://xiuming.info/": {
   },
-    "https://www.weizmann.ac.il/math/dekel/publications-0": {
-      "ignore_prefix": [
-        "<script>jQuery.extend",
-        "<script id=\"f5_cspm\">"
-      ]
-    }
+  "https://www.weizmann.ac.il/math/dekel/publications-0": {
+    "ignore_prefix": [
+      "<script>jQuery.extend",
+      "<script id=\"f5_cspm\">"
+    ]
+  }
 }
