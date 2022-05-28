@@ -5,7 +5,7 @@ past snapshot and sends you an email of the deltas if any.
 
 I'm using it to monitor website updates of the researchers I follow (e.g., new papers).
 
-![teaser](teaser.jpg)
+![teaser](https://xiuming.info/images/side_proj/webpage_monitor.jpg)
 
 ## Installing
 
