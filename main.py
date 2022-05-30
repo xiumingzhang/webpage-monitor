@@ -89,7 +89,9 @@ def main(args):
                 for url, delta in zip(changed, deltas):
                     msg += f'------\n{url}\n\n{delta}\n\n\n'
                 util.email_oneself(msg, args.gmail, subject='Webpage Monitor')
-                util.format_print('Change detected; email sent', 'header')
+                util.format_print('Change detected; email sent')
+            else:
+                util.format_print('No change detected')
 
             if time() - start_t > exit_after:
                 break
@@ -124,7 +126,7 @@ def snapshot(url, out_dir):
     try:
         request = requests.get(url)
     except requests.exceptions.ConnectionError:
-        util.format_print(f'Connection Error: {url}; ignored', 'warn')
+        util.format_print(f'Connection Error: {url}; ignored', fmt='warn')
         return False
     html_src = request.content.decode()
     if not exists(out_dir):
