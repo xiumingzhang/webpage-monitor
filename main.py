@@ -62,7 +62,9 @@ def main(args):
                 # Snapshot the current webpage.
                 out_dir = join(args.snapshot_dir,
                                util.folder_name_from_url(url))
-                snapshot(url, out_dir)
+                success = snapshot(url, out_dir)
+                if not success:
+                    continue
 
                 # Compare with the previous snapshot.
                 snapshot_paths = sorted(
@@ -76,8 +78,8 @@ def main(args):
 
                 # Remove earlier screenshots to avoid storage explosion.
                 if len(snapshot_paths) > 2:
-                    for x in snapshot_paths[:-2]:
-                        remove(x)
+                    for snapshot_path in snapshot_paths[:-2]:
+                        remove(snapshot_path)
 
             last_check_t = time()
 
@@ -119,13 +121,18 @@ def diff_snapshots(html0_path, html1_path, out_dir, opt):
 
 
 def snapshot(url, out_dir):
-    request = requests.get(url)
+    try:
+        request = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        util.format_print(f'Connection Error: {url}; ignored', 'warn')
+        return False
     html_src = request.content.decode()
     if not exists(out_dir):
         makedirs(out_dir)
     timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     html_path = join(out_dir, timestamp + '.html')
     util.write_file(html_src, html_path)
+    return True
 
 
 if __name__ == '__main__':
