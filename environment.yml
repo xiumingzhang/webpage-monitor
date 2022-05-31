@@ -1,8 +1,8 @@
 name: webpage-monitor
 dependencies:
-    - python=3.6
-    - absl-py
-    - numpy
-    - tqdm
-    - requests
-    - ipython
+  - python=3.6
+  - absl-py
+  - numpy
+  - tqdm
+  - requests
+  - ipython
