@@ -43,37 +43,3 @@ def email_oneself(msg,
     mail.login(gmail, pswd)
     mail.sendmail(from_email, to_emails, msg.as_string())
     mail.quit()
-
-
-def format_print(msg, fmt='header'):
-    '''Prints a message with format.
-    Args:
-        msg (str): Message to print.
-        fmt (str, optional): Format; try your luck with any value---don't worry;
-            if it's illegal, you will be prompted with all legal values.
-    Raises:
-        ValueError: If the input format is illegal.
-    '''
-    fmt_strs = {
-        'header': '\033[95m',
-        'warn': '\033[93m',
-        'fail': '\033[91m',
-        'bold': '\033[1m',
-        'underline': '\033[4m'
-    }
-
-    if fmt in fmt_strs.keys():
-        start_str = fmt_strs[fmt]
-        end_str = '\033[0m'
-
-    elif len(fmt) == 1:
-        start_str = '\n<' + ''.join([fmt] * 78) + '\n\n'  # as per PEP8
-        end_str = '\n' + start_str[2:-2] + '>\n'
-
-    else:
-        raise ValueError(
-            (f'Legal values for fmt: {list(fmt_strs.keys())}, plus any single '
-             'character (which will be repeated into the line separator), '
-             f'but input is {fmt}'))
-
-    print(start_str + msg + end_str)
