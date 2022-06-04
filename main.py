@@ -15,7 +15,9 @@ import util
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('roster_json', './roster.json', 'path to the roster')
-flags.DEFINE_string('gmail', 'xiuming6zhang@gmail.com', 'email address')
+flags.DEFINE_string('gmail', 'xiuming6zhang@gmail.com', 'Gmail address')
+flags.DEFINE_string('gmail_pswd_path', './gmail_app_pswd',
+                    'Gmail app-specific password')
 flags.DEFINE_integer('check_every', 43200, 'check every N seconds')
 flags.DEFINE_integer('exit_after', None, 'quit after N seconds')
 flags.DEFINE_string('snapshot_dir', './snapshots',
@@ -71,7 +73,10 @@ def main(_):
         msg = ''
         for url, delta in zip(changed, deltas):
           msg += f'------\n{url}\n\n{delta}\n\n\n'
-        util.email_oneself(msg, FLAGS.gmail, subject='Webpage Monitor')
+        util.email_oneself(msg,
+                           FLAGS.gmail,
+                           gmail_pswd_path=FLAGS.gmail_pswd_path,
+                           subject='Webpage Monitor')
 
         logging.info('Change detected; email sent')
       else:

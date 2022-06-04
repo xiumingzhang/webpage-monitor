@@ -1,1 +1,9 @@
-/Volumes/GoogleDrive/My Drive/root/work/github_private/webpage-monitor/roster.json
+{
+  "https://xiuming.info/": {},
+  "https://www.weizmann.ac.il/math/dekel/publications-0": {
+    "ignore_prefix": [
+      "<script>jQuery.extend",
+      "<script id=\"f5_cspm\">"
+    ]
+  }
+}

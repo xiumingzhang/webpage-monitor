@@ -17,11 +17,12 @@ Create a conda environment with all dependencies:
 
 ## Running
 
-1. Specify the URLs that you'd like to track (and optionally, their options) by
-editing `roster.json`; see `roster.json.example`.
+1. Specify the URLs that you'd like to track (and optional URL-specific
+arguments) by editing `./roster.json`.
 
-1. Edit `gmail_app_pswd`, with its content being your Gmail app-specific password
-(a Gmail-only password; see how to set one up [here](https://support.google.com/accounts/answer/185833?hl=en)).
+1. Create a file `./gmail_app_pswd`, with its content being your Gmail
+*app-specific* password (NOT your Google account password; see how to set one
+up [here](https://support.google.com/accounts/answer/185833?hl=en)).
 
 1. Activate the environment and run the monitor:
 
